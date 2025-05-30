@@ -8,7 +8,7 @@ import glob
 import logging
 import os
 from dataclasses import dataclass
-
+import json
 from typing import List, Optional
 
 import pandas as pd
@@ -24,6 +24,7 @@ from training.dataset.vos_segment_loader import (
     MultiplePNGSegmentLoader,
     PalettisedPNGSegmentLoader,
     SA1BSegmentLoader,
+    EntitySegSegmentLoader,
 )
 
 
@@ -302,6 +303,56 @@ class JSONRawDataset(VOSRawDataset):
             frames = [f for f in frames if f.frame_idx in valid_frame_ids]
 
         video = VOSVideo(video_name, video_idx, frames)
+        return video, segment_loader
+
+    def __len__(self):
+        return len(self.video_names)
+
+
+class EntitySegRawDataset(VOSRawDataset):
+    def __init__(
+        self,
+        img_folder,
+        gt_json,
+        excluded_videos_list_txt=None,
+    ):
+        self.img_folder = img_folder
+        self.gt_json = gt_json
+
+        # Read the subset defined in a given folder
+        with open(gt_json, "r") as f:
+            data = json.load(f)
+        subset = [os.path.basename(entry['image']) for entry in data]
+
+        # Read and process excluded files if provided
+        with g_pathmgr.open(excluded_videos_list_txt, "r") as f:
+            excluded_files = [os.path.splitext(name.strip())[0] for name in f.read().split(',')]
+
+        # Check if it's not in excluded_files and it exists
+        self.video_names = [
+            video_name for video_name in subset if os.path.splitext(video_name)[0] not in excluded_files
+        ]
+
+    def get_video(self, idx):
+        """
+        Given a VOSVideo object, return the mask tensors.
+        """
+        video_name = self.video_names[idx]
+        base_name = os.path.splitext(video_name)[0]
+
+        video_frame_path = os.path.join(self.img_folder, video_name)
+        # video_mask_path = os.path.join(self.gt_folder, base_name + ".json") # TODO:
+
+        segment_loader = EntitySegSegmentLoader(
+            self.gt_json,
+            idx,
+            video_frame_path=video_frame_path,
+        )
+
+        frames = []
+        frames.append(VOSFrame(0, image_path=video_frame_path))
+        # video id needs to be image_id to be able to load correct annotation file during eval
+        video = VOSVideo(video_name, idx, frames)  # GET ID OF IMAGE
         return video, segment_loader
 
     def __len__(self):

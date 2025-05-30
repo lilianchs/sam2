@@ -298,3 +298,28 @@ class SA1BSegmentLoader:
 
     def load(self, frame_idx):
         return self.segments
+
+
+
+class EntitySegSegmentLoader:
+    def __init__(
+        self,
+        gt_json,
+        idx,
+        video_frame_path=None,
+    ):
+        with open(gt_json, "r") as f:
+            self.frame_annots = json.load(f)
+
+        self.frame_annots = self.frame_annots[idx]["annotation"]
+
+        rle_masks = []
+        for frame_annot in self.frame_annots:
+            rle_masks.append(frame_annot["segmentation"]) # TODO:
+
+        self.segments = LazySegments()
+        for i, rle in enumerate(rle_masks):
+            self.segments[i] = rle
+
+    def load(self, frame_idx=None):
+        return self.segments
