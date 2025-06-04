@@ -13,9 +13,9 @@ scratch:
 
 dataset:
   # PATHS to Dataset
-  img_folder: '/ccn2/u/rmvenkat/data/entity_seg_dataset/entity_seg_images/entity_01_11580' # PATH to MOSE JPEGImages folder
-  gt_json: '/ccn2/u/lilianch/external_repos/sam2/distill/preprocessed_entityseg_data_filtered.json'  # PATH to MOSE Annotations folder
-  excluded_videos_list_txt: '/ccn2/u/lilianch/external_repos/sam2/training/assets/entityseg_100_exclude_list.txt' # Optional PATH to filelist containing a subset of videos to be excluded
+  img_folder: '/ccn2/u/rmvenkat/data/entity_seg_dataset/entity_seg_images/entity_01_11580' # PATH to EntitySeg JPEGImages folder
+  gt_json: '/ccn2/u/lilianch/external_repos/sam2/distill/preprocessed_entityseg_data_filtered.json'  # PATH to EntitySeg Annotations folder
+  excluded_videos_list_txt: '/ccn2/u/lilianch/external_repos/sam2/training/assets/entityseg_100_exclude_list.txt' # (not used) Optional PATH to filelist containing a subset of videos to be excluded
   multiplier: 2
 
 # Video transforms
